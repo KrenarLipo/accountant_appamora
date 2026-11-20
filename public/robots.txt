@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /app
+Disallow: /api/
+Disallow: /email/
+Disallow: /reset-password/
+
+Sitemap: https://accountant.appamora.com/sitemap.xml
