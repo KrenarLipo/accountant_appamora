@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { api } from '../lib/api';
 import { useWorkspaceState } from '../lib/workspace';
-import { cx } from './ui';
+import { LogoMark, cx } from './ui';
 
 const links = [
     { to: '/', label: 'Dashboard', end: true },
@@ -74,9 +74,12 @@ export default function Layout() {
     return (
         <div className="flex min-h-full">
             <aside className="hidden w-64 shrink-0 flex-col gap-6 bg-ink p-5 lg:flex">
-                <a href="/" className="flex items-center gap-2 font-semibold text-white">
-                    <span className="grid size-8 place-items-center rounded-lg bg-brand-500 text-sm font-bold">A</span>
-                    Accountant
+                <a href="/" className="flex items-center gap-2.5 text-white">
+                    <LogoMark size={36} inverted />
+                    <span className="flex flex-col leading-tight">
+                        <span className="text-lg font-extrabold tracking-tight">accountant</span>
+                        <span className="text-xs text-slate-300">by <span className="font-bold text-brand-500">app</span>amora</span>
+                    </span>
                 </a>
                 {switcher}
                 {nav}

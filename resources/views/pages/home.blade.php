@@ -38,44 +38,79 @@
     </x-slot:head>
 
     {{-- Hero --}}
-    <section class="relative overflow-hidden bg-gradient-to-b from-brand-50/60 to-white">
-        <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
-            <div>
-                <p class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">For individuals and small businesses</p>
-                <h1 class="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">Know where your money goes.</h1>
-                <p class="mt-5 max-w-xl text-lg text-slate-600">Record income and expenses in seconds, set monthly budgets and get an alert before you overspend. One clear dashboard for your household or your business.</p>
-                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <a href="{{ route('register') }}" class="rounded-lg bg-brand-600 px-6 py-3 text-center font-semibold text-white shadow-sm hover:bg-brand-700">Start free</a>
-                    <a href="{{ route('features') }}" class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-center font-semibold text-ink hover:bg-slate-50">See what it does</a>
+    <section class="bg-white">
+        <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
+            <div class="flex flex-col gap-5">
+                <p class="text-base font-medium text-slate-500 sm:text-lg">Money clarity for households and small businesses</p>
+                <h1 class="flex flex-col text-ink">
+                    <span class="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Know where it goes.</span>
+                    <span class="text-8xl font-extrabold leading-none tracking-tighter sm:text-9xl">Grow<span class="text-brand-500">.</span></span>
+                </h1>
+                <p class="max-w-xl text-lg leading-relaxed text-slate-600">Track every payment by day, see profit or loss at a glance, and get an alert explained in plain words when a cost drifts from normal.</p>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <a href="{{ route('register') }}" class="rounded-xl bg-ink px-7 py-4 text-center text-base font-bold text-white shadow-sm hover:bg-ink/90">Start free</a>
+                    <a href="{{ route('features') }}" class="inline-flex items-center justify-center gap-1.5 text-base font-semibold text-ink hover:underline">
+                        See how it works
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand-600" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+                    </a>
                 </div>
-                <p class="mt-4 text-sm text-slate-500">No bank connection needed. No card required.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="rounded-full bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-700">Accountant · live</span>
+                    <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">Wealth · soon</span>
+                    <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">Invest · soon</span>
+                </div>
+                <p class="text-sm text-slate-500">No bank connection needed · Import your Excel in one step · No card required</p>
             </div>
 
             {{-- Illustrative dashboard preview --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60" aria-label="Example dashboard" role="img">
+            <div class="flex flex-col gap-4 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200/70 sm:p-6" aria-label="Example dashboard" role="img">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-ink">This month</p>
-                    <p class="text-xs text-slate-400">Example data</p>
+                    <p class="text-lg font-bold text-ink">November</p>
+                    <p class="text-xs text-slate-500">Example data</p>
                 </div>
-                <div class="mt-4 grid grid-cols-3 gap-3">
-                    <div class="rounded-xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Income</p><p class="mt-1 font-semibold text-ink">€2,450</p></div>
-                    <div class="rounded-xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Expenses</p><p class="mt-1 font-semibold text-ink">€1,830</p></div>
-                    <div class="rounded-xl bg-brand-50 p-3"><p class="text-xs text-brand-700">Net</p><p class="mt-1 font-semibold text-brand-700">+€620</p></div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="rounded-2xl bg-white p-3 sm:p-4"><p class="text-xs text-slate-500">Income</p><p class="mt-1 text-lg font-bold text-ink sm:text-xl">€3,150</p></div>
+                    <div class="rounded-2xl bg-white p-3 sm:p-4"><p class="text-xs text-slate-500">Paid out</p><p class="mt-1 text-lg font-bold text-ink sm:text-xl">€4,390</p></div>
+                    <div class="rounded-2xl bg-ink p-3 text-white sm:p-4"><p class="text-xs text-brand-200">Profit</p><p class="mt-1 text-lg font-bold sm:text-xl">+€1,510</p></div>
                 </div>
-                <div class="mt-5 flex h-32 items-end gap-2">
-                    @foreach ([45, 60, 52, 70, 58, 80] as $i => $height)
-                        <div class="flex flex-1 flex-col justify-end gap-1">
-                            <div class="rounded-t bg-brand-500/80" style="height: {{ $height }}%"></div>
-                        </div>
-                    @endforeach
+                <div class="flex flex-col gap-3 rounded-2xl bg-white p-4">
+                    <div class="flex justify-between text-sm"><span class="font-semibold text-ink">Groceries</span><span class="text-slate-500">72% of budget</span></div>
+                    <div class="h-2 rounded-full bg-slate-100"><div class="h-2 w-[72%] rounded-full bg-brand-500"></div></div>
+                    <div class="flex justify-between text-sm"><span class="font-semibold text-ink">Marketing</span><span class="font-semibold text-amber-700">above normal</span></div>
+                    <div class="h-2 rounded-full bg-slate-100"><div class="h-2 w-[96%] rounded-full bg-orange-500"></div></div>
                 </div>
-                <div class="mt-5 flex flex-col gap-3">
-                    @foreach ([['Groceries', 72, 'bg-amber-500'], ['Dining out', 91, 'bg-red-500'], ['Transport', 40, 'bg-brand-500']] as [$name, $pct, $color])
-                        <div>
-                            <div class="flex justify-between text-xs"><span class="font-medium text-slate-600">{{ $name }}</span><span class="text-slate-400">{{ $pct }}% of budget</span></div>
-                            <div class="mt-1 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full {{ $color }}" style="width: {{ $pct }}%"></div></div>
-                        </div>
-                    @endforeach
+                <div class="flex flex-col gap-1.5 rounded-2xl bg-ink p-4 text-white">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-200">Alert · explained by AI</span>
+                    <span class="text-sm leading-relaxed text-slate-200">Marketing is EUR 275 against a normal EUR 150 — mostly one ads payment on the 12th. Check whether it was planned.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- Platforms --}}
+    <section id="platforms" class="border-y border-slate-200 bg-slate-50">
+        <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+            <div class="flex items-center gap-3">
+                <x-logo-mark :size="40" />
+                <p class="text-xl font-extrabold tracking-tight text-ink"><span class="text-brand-600">app</span>amora</p>
+            </div>
+            <h2 class="mt-4 text-3xl font-bold tracking-tight text-ink">One account. Every money tool.</h2>
+            <p class="mt-3 max-w-2xl text-slate-600">Accountant is the first platform from AppAmora. Sign in once and switch on more modules as they launch.</p>
+            <div class="mt-10 grid gap-5 md:grid-cols-3">
+                <div class="flex flex-col gap-2 rounded-2xl bg-ink p-6 text-white">
+                    <span class="self-start rounded-full bg-brand-500 px-2.5 py-1 text-xs font-bold text-ink">Live</span>
+                    <h3 class="text-xl font-bold">Accountant</h3>
+                    <p class="text-sm text-slate-300">Income, expenses, budgets, profit and loss, alerts and Excel import.</p>
+                </div>
+                <div class="flex flex-col gap-2 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+                    <span class="self-start rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">Coming later</span>
+                    <h3 class="text-xl font-bold text-ink">Wealth</h3>
+                    <p class="text-sm text-slate-600">Savings goals, net worth and habits that build wealth over time.</p>
+                </div>
+                <div class="flex flex-col gap-2 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+                    <span class="self-start rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-800">Coming later</span>
+                    <h3 class="text-xl font-bold text-ink">Invest</h3>
+                    <p class="text-sm text-slate-600">Portfolio and market tracking — information, not investment advice.</p>
                 </div>
             </div>
         </div>
@@ -162,8 +197,9 @@
     {{-- CTA --}}
     <section class="bg-ink">
         <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6">
+            <x-logo-mark :size="56" :inverted="true" />
             <h2 class="text-3xl font-bold text-white">Spot problems earlier. Decide better.</h2>
-            <a href="{{ route('register') }}" class="rounded-lg bg-brand-500 px-6 py-3 font-semibold text-white hover:bg-brand-600">Create your free account</a>
+            <a href="{{ route('register') }}" class="rounded-xl bg-brand-500 px-7 py-4 font-bold text-ink hover:bg-brand-400">Create your free account</a>
         </div>
     </section>
 </x-layouts.public>

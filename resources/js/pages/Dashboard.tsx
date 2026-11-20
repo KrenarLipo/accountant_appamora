@@ -7,7 +7,7 @@ import { useApi } from '../lib/useApi';
 import { useWorkspace } from '../lib/workspace';
 import type { Dashboard as DashboardData } from '../types';
 
-const fallbackColors = ['#10b981', '#2563eb', '#f59e0b', '#db2777', '#7c3aed', '#0891b2', '#64748b'];
+const fallbackColors = ['#a6e22e', '#2563eb', '#f59e0b', '#db2777', '#7c3aed', '#0891b2', '#64748b'];
 
 function Change({ current, previous, inverse = false }: { current: string; previous: string; inverse?: boolean }) {
     const change = percentChange(current, previous);
@@ -72,7 +72,7 @@ export default function Dashboard() {
                 <EmptyState
                     title="Add your first transaction"
                     text="Your dashboard fills in as you record income and expenses. It only takes a few seconds."
-                    action={<Link to="/transactions?new=1" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Add transaction</Link>}
+                    action={<Link to="/transactions?new=1" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90">Add transaction</Link>}
                 />
             )}
 
@@ -111,9 +111,9 @@ export default function Dashboard() {
                                 <YAxis tickLine={false} axisLine={false} fontSize={12} width={70} tickFormatter={(value: number) => fmt(value)} />
                                 <Tooltip formatter={(value) => fmt(Number(value))} cursor={{ fill: '#f1f5f9' }} />
                                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="Income" stackId="in" fill="#10b981" />
-                                <Bar dataKey="Earned back" stackId="in" fill="#6ee7b7" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="Expenses" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Income" stackId="in" fill="#a6e22e" />
+                                <Bar dataKey="Earned back" stackId="in" fill="#d9f99d" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Expenses" fill="#13235b" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

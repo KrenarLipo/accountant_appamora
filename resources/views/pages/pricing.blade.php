@@ -14,7 +14,7 @@
                     <li>Budgets and alerts</li>
                     <li>Full dashboard</li>
                 </ul>
-                <a href="{{ route('register') }}" class="mt-6 rounded-lg bg-brand-600 px-4 py-2.5 text-center font-semibold text-white hover:bg-brand-700">Start free</a>
+                <a href="{{ route('register') }}" class="mt-6 rounded-lg bg-brand-500 px-4 py-2.5 text-center font-semibold text-ink hover:bg-brand-400">Start free</a>
             </div>
             <div class="flex flex-col rounded-2xl border border-slate-200 p-6">
                 <p class="text-sm font-semibold text-slate-400">Planned</p>

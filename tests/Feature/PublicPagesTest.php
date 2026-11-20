@@ -10,7 +10,7 @@ class PublicPagesTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[TestWith(['/', 'Know where your money goes.'])]
+    #[TestWith(['/', 'Know where it goes.'])]
     #[TestWith(['/features', 'What Accountant does'])]
     #[TestWith(['/pricing', 'Simple pricing'])]
     public function test_public_pages_are_visible_without_logging_in(string $path, string $heading): void

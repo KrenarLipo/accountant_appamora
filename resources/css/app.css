@@ -5,13 +5,17 @@
 @source '../js/**/*.{ts,tsx}';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-ink: #172440;
-    --color-brand-50: #ecfdf5;
-    --color-brand-100: #d1fae5;
-    --color-brand-500: #10b981;
-    --color-brand-600: #059669;
-    --color-brand-700: #047857;
+    /* AppAmora: navy core + lime accent. Lime is for fills and buttons with navy text;
+       brand-600/700 are dark limes that stay readable as text on white. */
+    --color-ink: #13235b;
+    --color-brand-50: #f3fbe3;
+    --color-brand-100: #e3f5c6;
+    --color-brand-200: #cdeb98;
+    --color-brand-400: #b9ea5c;
+    --color-brand-500: #a6e22e;
+    --color-brand-600: #4d7c0f;
+    --color-brand-700: #3f6212;
 }

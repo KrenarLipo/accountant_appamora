@@ -2,7 +2,7 @@ import { useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes,
 
 const cx = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(' ');
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'danger' | 'ghost';
 
 export function Button({ variant = 'primary', className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
     return (
@@ -10,7 +10,8 @@ export function Button({ variant = 'primary', className, ...props }: ButtonHTMLA
             type="button"
             className={cx(
                 'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:cursor-not-allowed disabled:opacity-50',
-                variant === 'primary' && 'bg-brand-600 text-white shadow-sm hover:bg-brand-700',
+                variant === 'primary' && 'bg-ink text-white shadow-sm hover:bg-ink/90',
+                variant === 'accent' && 'bg-brand-500 font-semibold text-ink shadow-sm hover:bg-brand-400',
                 variant === 'secondary' && 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50',
                 variant === 'danger' && 'bg-red-600 text-white hover:bg-red-700',
                 variant === 'ghost' && 'text-slate-600 hover:bg-slate-100',
@@ -133,3 +134,14 @@ export function ProgressBar({ percent }: { percent: number }) {
 }
 
 export { cx };
+
+/** The AppAmora peak badge. `inverted` is for dark backgrounds. */
+export function LogoMark({ size = 32, inverted = false }: { size?: number; inverted?: boolean }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="31" fill={inverted ? '#FFFFFF' : '#13235B'} />
+            <path d="M32 13 L50 49 H41 L32 31 L23 49 H14 Z" fill={inverted ? '#13235B' : '#FFFFFF'} />
+            <path d="M32 36 L38.5 49 H25.5 Z" fill="#A6E22E" />
+        </svg>
+    );
+}
