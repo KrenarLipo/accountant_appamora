@@ -12,19 +12,54 @@ Live at <https://accountant.appamora.com/>.
 - MySQL / MariaDB
 - Hosting: GoDaddy cPanel
 
-## Local setup
+## Setting up on a Linux computer
+
+Tested on Ubuntu/Debian. You need PHP 8.3, Composer, Node.js 20+ and MariaDB or MySQL.
 
 ```bash
+# 1. System packages (Ubuntu/Debian)
+sudo apt install php8.3-cli php8.3-mysql php8.3-mbstring php8.3-xml php8.3-curl \
+                 php8.3-zip php8.3-gd php8.3-intl mariadb-server git unzip
+# Composer: https://getcomposer.org/download/   Node.js 20+: https://nodejs.org or nvm
+
+# 2. Get the code
+git clone https://github.com/KrenarLipo/accountant_appamora.git
+cd accountant_appamora
 composer install
 npm install
-cp .env.example .env      # then set DB_* values
+
+# 3. Create the local databases (choose your own password)
+sudo mysql -e "
+CREATE DATABASE accountant_local CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE accountant_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'accountant'@'localhost' IDENTIFIED BY 'your-local-password';
+GRANT ALL ON accountant_local.* TO 'accountant'@'localhost';
+GRANT ALL ON accountant_testing.* TO 'accountant'@'localhost';"
+
+# 4. Configuration (.env is never committed)
+cp .env.example .env
+#    edit .env: DB_PASSWORD="your-local-password"
 php artisan key:generate
-php artisan migrate --seed   # --seed adds demo data (local only)
-composer run dev             # app at http://localhost:8000
+
+# 5. Load the data — pick ONE:
+mysql -u accountant -p accountant_local < database/sql/accountant_demo.sql   # same demo data as before
+# or: php artisan migrate --seed                                             # fresh, randomly generated demo data
+
+# 6. Run it
+npm run build
+composer run dev             # http://localhost:8000
 ```
 
 Demo login (local only): `demo@example.com` / `password`.
-Emails (verification, password reset, budget alerts) are written to `storage/logs/laravel.log` locally.
+Emails (verification, password reset, alerts) are written to `storage/logs/laravel.log` locally.
+
+After pulling new changes later: `composer install && npm install && php artisan migrate && npm run build`.
+
+## Database file for GoDaddy
+
+`database/sql/accountant_demo.sql` holds the full table structure plus the demo data. Import it with phpMyAdmin
+(select the database → Import). Remove or change the demo user before going public. This repository is public:
+never commit real passwords or customer data to that file.
 
 ## Scheduled tasks and AI
 
