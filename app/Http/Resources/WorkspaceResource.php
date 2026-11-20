@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Contracts\ExplainsAlerts;
 use App\Enums\WorkspaceRole;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
@@ -27,6 +28,8 @@ class WorkspaceResource extends JsonResource
             'base_currency' => $this->base_currency,
             'timezone' => $this->timezone,
             'country' => $this->country,
+            'ai_insights_enabled' => $this->ai_insights_enabled,
+            'ai_available' => app(ExplainsAlerts::class)->isAvailable(),
             'role' => $role,
             'permissions' => [
                 'manage_workspace' => $roleEnum?->canManageWorkspace() ?? false,

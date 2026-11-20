@@ -9,6 +9,7 @@ use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Models\Workspace;
 use App\Services\BudgetTracker;
+use App\Services\CategoryNormMonitor;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,7 +19,10 @@ use Illuminate\Validation\Rule;
 
 class TransactionController extends Controller
 {
-    public function __construct(private BudgetTracker $budgetTracker) {}
+    public function __construct(
+        private BudgetTracker $budgetTracker,
+        private CategoryNormMonitor $normMonitor,
+    ) {}
 
     public function index(Request $request, Workspace $workspace): AnonymousResourceCollection
     {
@@ -101,11 +105,16 @@ class TransactionController extends Controller
 
         $transaction->delete();
 
+        $this->checkBudgets($workspace, $transaction->transaction_date);
+
         return response()->noContent();
     }
 
     private function checkBudgets(Workspace $workspace, \DateTimeInterface $date): void
     {
-        $this->budgetTracker->checkAlerts($workspace, CarbonImmutable::instance($date));
+        $month = CarbonImmutable::instance($date);
+
+        $this->budgetTracker->checkAlerts($workspace, $month);
+        $this->normMonitor->check($workspace, $month);
     }
 }

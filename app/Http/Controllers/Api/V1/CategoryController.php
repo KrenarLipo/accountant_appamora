@@ -8,6 +8,9 @@ use App\Http\Requests\Api\SaveCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Models\Workspace;
+use App\Services\CategoryNormMonitor;
+use App\Services\FinancialSummary;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,13 +21,24 @@ use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
-    public function index(Workspace $workspace): AnonymousResourceCollection
+    /**
+     * Categories with this month's total and how it compares with the normal amount.
+     */
+    public function index(Workspace $workspace, FinancialSummary $summary, CategoryNormMonitor $normMonitor): AnonymousResourceCollection
     {
         Gate::authorize('view', $workspace);
 
-        return CategoryResource::collection(
-            $workspace->categories()->withCount('transactions')->orderBy('type')->orderBy('name')->get()
-        );
+        $month = CarbonImmutable::now($workspace->timezone);
+        $totals = $summary->categoryTotals($workspace, $month->startOfMonth(), $month->endOfMonth());
+        $norms = collect($normMonitor->statuses($workspace, $month))->keyBy('category_id');
+
+        $categories = $workspace->categories()->withCount('transactions')->orderBy('type')->orderBy('name')->get()
+            ->each(function (Category $category) use ($totals, $norms): void {
+                $category->setAttribute('month_total', $totals[$category->id] ?? '0.00');
+                $category->setAttribute('norm', $norms->get($category->id));
+            });
+
+        return CategoryResource::collection($categories)->additional(['meta' => ['month' => $month->format('Y-m')]]);
     }
 
     public function store(SaveCategoryRequest $request, Workspace $workspace): CategoryResource

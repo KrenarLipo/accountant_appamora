@@ -25,6 +25,7 @@ class UpdateWorkspaceRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'timezone' => ['required', 'timezone:all'],
             'country' => ['nullable', 'string', 'size:2', 'alpha'],
+            'ai_insights_enabled' => ['sometimes', 'boolean'],
         ];
     }
 }

@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\DB;
 class FinancialSummary
 {
     /**
-     * @return array{income: string, expenses: string, net: string}
+     * Net result = income + money earned back on expenses - expenses (cash-basis profit or loss).
+     *
+     * @return array{income: string, expenses: string, returns: string, net: string}
      */
     public function totals(Workspace $workspace, CarbonImmutable $from, CarbonImmutable $to): array
     {
@@ -23,17 +25,56 @@ class FinancialSummary
             ->whereBetween('transaction_date', [$from->toDateString(), $to->toDateString()])
             ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS income', [TransactionType::Income->value])
             ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS expenses', [TransactionType::Expense->value])
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN return_amount END), 0) AS returns', [TransactionType::Expense->value])
             ->toBase()
             ->first();
 
-        $income = BigDecimal::of($row->income);
-        $expenses = BigDecimal::of($row->expenses);
+        return $this->result($row->income, $row->expenses, $row->returns);
+    }
 
-        return [
-            'income' => $this->format($income),
-            'expenses' => $this->format($expenses),
-            'net' => $this->format($income->minus($expenses)),
-        ];
+    /**
+     * Income, expenses, returns and net result for every day in the range that has activity.
+     *
+     * @return list<array{date: string, income: string, expenses: string, returns: string, net: string, count: int}>
+     */
+    public function calendar(Workspace $workspace, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        return $workspace->transactions()
+            ->whereBetween('transaction_date', [$from->toDateString(), $to->toDateString()])
+            ->selectRaw('transaction_date')
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS income', [TransactionType::Income->value])
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS expenses', [TransactionType::Expense->value])
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN return_amount END), 0) AS returns', [TransactionType::Expense->value])
+            ->selectRaw('COUNT(*) AS count')
+            ->groupBy('transaction_date')
+            ->orderBy('transaction_date')
+            ->toBase()
+            ->get()
+            ->map(fn ($row) => [
+                'date' => substr((string) $row->transaction_date, 0, 10),
+                ...$this->result($row->income, $row->expenses, $row->returns),
+                'count' => (int) $row->count,
+            ])
+            ->all();
+    }
+
+    /**
+     * Total recorded per category (income and expense categories) in the range.
+     *
+     * @return array<int, string>
+     */
+    public function categoryTotals(Workspace $workspace, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        return $workspace->transactions()
+            ->whereIn('type', [TransactionType::Income, TransactionType::Expense])
+            ->whereNotNull('category_id')
+            ->whereBetween('transaction_date', [$from->toDateString(), $to->toDateString()])
+            ->selectRaw('category_id, SUM(amount) AS total')
+            ->groupBy('category_id')
+            ->toBase()
+            ->pluck('total', 'category_id')
+            ->map(fn ($total) => $this->format(BigDecimal::of($total)))
+            ->all();
     }
 
     /**
@@ -45,7 +86,7 @@ class FinancialSummary
     {
         $movements = $workspace->transactions()
             ->selectRaw('account_id')
-            ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE -amount END) AS movement', [TransactionType::Income->value])
+            ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE -amount END) + SUM(COALESCE(return_amount, 0)) AS movement', [TransactionType::Income->value])
             ->groupBy('account_id')
             ->toBase()
             ->pluck('movement', 'account_id');
@@ -80,7 +121,7 @@ class FinancialSummary
     /**
      * Income and expenses for each of the last N months, oldest first.
      *
-     * @return list<array{month: string, income: string, expenses: string}>
+     * @return list<array{month: string, income: string, expenses: string, returns: string, net: string}>
      */
     public function monthlyTrend(Workspace $workspace, CarbonImmutable $endMonth, int $months = 6): array
     {
@@ -88,24 +129,22 @@ class FinancialSummary
 
         $rows = $workspace->transactions()
             ->whereBetween('transaction_date', [$start->toDateString(), $endMonth->endOfMonth()->toDateString()])
-            ->whereIn('type', [TransactionType::Income, TransactionType::Expense])
-            ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') AS month, type, SUM(amount) AS total")
-            ->groupBy('month', 'type')
+            ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') AS month")
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS income', [TransactionType::Income->value])
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN amount END), 0) AS expenses', [TransactionType::Expense->value])
+            ->selectRaw('COALESCE(SUM(CASE WHEN type = ? THEN return_amount END), 0) AS returns', [TransactionType::Expense->value])
+            ->groupBy('month')
             ->toBase()
             ->get()
-            ->groupBy('month');
+            ->keyBy('month');
 
         $trend = [];
 
         for ($i = 0; $i < $months; $i++) {
             $month = $start->addMonths($i)->format('Y-m');
-            $byType = ($rows[$month] ?? collect())->pluck('total', 'type');
+            $row = $rows[$month] ?? null;
 
-            $trend[] = [
-                'month' => $month,
-                'income' => $this->format(BigDecimal::of($byType[TransactionType::Income->value] ?? 0)),
-                'expenses' => $this->format(BigDecimal::of($byType[TransactionType::Expense->value] ?? 0)),
-            ];
+            $trend[] = ['month' => $month, ...$this->result($row->income ?? 0, $row->expenses ?? 0, $row->returns ?? 0)];
         }
 
         return $trend;
@@ -158,7 +197,24 @@ class FinancialSummary
             ->all();
     }
 
-    private function format(BigDecimal $amount): string
+    /**
+     * @return array{income: string, expenses: string, returns: string, net: string}
+     */
+    private function result(mixed $income, mixed $expenses, mixed $returns): array
+    {
+        $income = BigDecimal::of($income);
+        $expenses = BigDecimal::of($expenses);
+        $returns = BigDecimal::of($returns);
+
+        return [
+            'income' => $this->format($income),
+            'expenses' => $this->format($expenses),
+            'returns' => $this->format($returns),
+            'net' => $this->format($income->plus($returns)->minus($expenses)),
+        ];
+    }
+
+    public function format(BigDecimal $amount): string
     {
         return (string) $amount->toScale(2, RoundingMode::HalfUp);
     }

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'type', 'account_id', 'transfer_account_id', 'category_id', 'amount',
+    'type', 'account_id', 'transfer_account_id', 'category_id', 'amount', 'return_amount',
     'currency', 'transaction_date', 'merchant', 'description',
 ])]
 class Transaction extends Model
@@ -28,6 +28,7 @@ class Transaction extends Model
         return [
             'type' => TransactionType::class,
             'amount' => 'decimal:4',
+            'return_amount' => 'decimal:4',
             'transaction_date' => 'date:Y-m-d',
         ];
     }

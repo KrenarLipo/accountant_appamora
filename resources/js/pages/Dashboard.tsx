@@ -45,6 +45,7 @@ export default function Dashboard() {
     const trend = dashboard.trend.map((row) => ({
         month: monthLabel(row.month, 'short'),
         Income: Number(row.income),
+        'Earned back': Number(row.returns),
         Expenses: Number(row.expenses),
     }));
     const categories = dashboard.expenses_by_category.map((row, index) => ({
@@ -75,7 +76,7 @@ export default function Dashboard() {
                 />
             )}
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <p className="text-sm text-slate-500">Income</p>
                     <p className="mt-1 text-2xl font-bold text-ink">{fmt(dashboard.totals.income)}</p>
@@ -86,12 +87,17 @@ export default function Dashboard() {
                     <p className="mt-1 text-2xl font-bold text-ink">{fmt(dashboard.totals.expenses)}</p>
                     <Change current={dashboard.totals.expenses} previous={dashboard.previous_totals.expenses} inverse />
                 </Card>
+                <Card>
+                    <p className="text-sm text-slate-500">Earned back</p>
+                    <p className="mt-1 text-2xl font-bold text-ink">{fmt(dashboard.totals.returns)}</p>
+                    <span className="text-xs text-slate-400">Money returned by your expenses</span>
+                </Card>
                 <Card className={Number(dashboard.totals.net) >= 0 ? 'bg-brand-50/50' : 'bg-red-50/50'}>
-                    <p className="text-sm text-slate-500">Net movement</p>
+                    <p className="text-sm text-slate-500">{Number(dashboard.totals.net) >= 0 ? 'Profit' : 'Loss'}</p>
                     <p className={`mt-1 text-2xl font-bold ${Number(dashboard.totals.net) >= 0 ? 'text-brand-700' : 'text-red-600'}`}>
                         {money(dashboard.totals.net, currency, { signed: true })}
                     </p>
-                    <span className="text-xs text-slate-400">Income minus expenses; transfers excluded</span>
+                    <span className="text-xs text-slate-400">Income + earned back − expenses; transfers excluded</span>
                 </Card>
             </div>
 
@@ -105,7 +111,8 @@ export default function Dashboard() {
                                 <YAxis tickLine={false} axisLine={false} fontSize={12} width={70} tickFormatter={(value: number) => fmt(value)} />
                                 <Tooltip formatter={(value) => fmt(Number(value))} cursor={{ fill: '#f1f5f9' }} />
                                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Income" stackId="in" fill="#10b981" />
+                                <Bar dataKey="Earned back" stackId="in" fill="#6ee7b7" radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="Expenses" fill="#94a3b8" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>

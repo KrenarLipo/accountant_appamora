@@ -6,10 +6,12 @@ import { cx } from './ui';
 
 const links = [
     { to: '/', label: 'Dashboard', end: true },
+    { to: '/calendar', label: 'Calendar' },
     { to: '/transactions', label: 'Transactions' },
     { to: '/budgets', label: 'Budgets' },
     { to: '/accounts', label: 'Accounts' },
     { to: '/categories', label: 'Categories' },
+    { to: '/import-export', label: 'Import & export' },
     { to: '/settings', label: 'Settings' },
 ];
 

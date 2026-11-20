@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { api, ApiError } from '../lib/api';
-import { todayIso } from '../lib/format';
+import { money, todayIso } from '../lib/format';
 import type { AccountBalance, Category, Transaction, TransactionType } from '../types';
 import { Button, Field, Input, Select, cx } from './ui';
 
@@ -9,15 +9,18 @@ interface Props {
     accounts: AccountBalance[];
     categories: Category[];
     transaction?: Transaction | null;
+    defaultDate?: string;
+    currency: string;
     onSaved: () => void;
 }
 
-export default function TransactionForm({ workspaceId, accounts, categories, transaction, onSaved }: Props) {
+export default function TransactionForm({ workspaceId, accounts, categories, transaction, defaultDate, currency, onSaved }: Props) {
     const activeAccounts = accounts.filter((account) => account.is_active || account.id === transaction?.account.id);
     const [form, setForm] = useState({
         type: (transaction?.type ?? 'expense') as TransactionType,
         amount: transaction ? Number(transaction.amount).toFixed(2) : '',
-        transaction_date: transaction?.transaction_date ?? todayIso(),
+        return_amount: transaction?.return_amount ? Number(transaction.return_amount).toFixed(2) : '',
+        transaction_date: transaction?.transaction_date ?? defaultDate ?? todayIso(),
         account_id: String(transaction?.account.id ?? activeAccounts[0]?.id ?? ''),
         transfer_account_id: String(transaction?.transfer_account?.id ?? ''),
         category_id: String(transaction?.category?.id ?? ''),
@@ -39,6 +42,7 @@ export default function TransactionForm({ workspaceId, accounts, categories, tra
         const body = {
             type: form.type,
             amount: form.amount,
+            return_amount: form.type === 'expense' && form.return_amount !== '' ? form.return_amount : null,
             transaction_date: form.transaction_date,
             account_id: Number(form.account_id),
             transfer_account_id: isTransfer ? Number(form.transfer_account_id) || null : undefined,
@@ -116,6 +120,21 @@ export default function TransactionForm({ workspaceId, accounts, categories, tra
                 )}
             </div>
 
+            {form.type === 'expense' && (
+                <div className="rounded-xl bg-slate-50 p-3">
+                    <Field
+                        label="Money earned back (optional)"
+                        error={errors.return_amount?.[0]}
+                        hint="What this expense brought in, e.g. you bought stock for 300 and sold it for 450. Don't add the same money again as income."
+                    >
+                        <Input type="number" inputMode="decimal" step="0.01" min="0" value={form.return_amount} onChange={set('return_amount')} placeholder="0.00" />
+                    </Field>
+                    {form.return_amount !== '' && form.amount !== '' && (
+                        <ProfitPreview paid={Number(form.amount)} earned={Number(form.return_amount)} currency={currency} />
+                    )}
+                </div>
+            )}
+
             {form.type !== 'transfer' && (
                 <Field label={form.type === 'income' ? 'From (payer)' : 'Merchant / payee'} error={errors.merchant?.[0]}>
                     <Input value={form.merchant} onChange={set('merchant')} placeholder={form.type === 'income' ? 'e.g. Employer' : 'e.g. Supermarket'} />
@@ -131,5 +150,19 @@ export default function TransactionForm({ workspaceId, accounts, categories, tra
                 {saving ? 'Saving…' : transaction ? 'Save changes' : 'Add transaction'}
             </Button>
         </form>
+    );
+}
+
+function ProfitPreview({ paid, earned, currency }: { paid: number; earned: number; currency: string }) {
+    const result = earned - paid;
+    const margin = paid > 0 ? (result / paid) * 100 : null;
+    const positive = result >= 0;
+
+    return (
+        <p className={cx('mt-2 text-sm font-medium', positive ? 'text-brand-700' : 'text-red-600')} aria-live="polite">
+            Paid {money(paid, currency)} · got back {money(earned, currency)} →{' '}
+            {positive ? 'profit' : 'loss'} {money(Math.abs(result), currency)}
+            {margin !== null && ` (${margin >= 0 ? '+' : ''}${margin.toFixed(1)}%)`}
+        </p>
     );
 }

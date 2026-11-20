@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'type', 'color', 'parent_id'])]
+#[Fillable(['name', 'type', 'color', 'parent_id', 'normal_amount', 'normal_tolerance'])]
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
@@ -25,6 +25,8 @@ class Category extends Model
     {
         return [
             'type' => CategoryType::class,
+            'normal_amount' => 'decimal:4',
+            'normal_tolerance' => 'integer',
         ];
     }
 
@@ -42,6 +44,14 @@ class Category extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    /**
+     * @return HasMany<CategoryAlert, $this>
+     */
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(CategoryAlert::class);
     }
 
     /**

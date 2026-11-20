@@ -35,6 +35,8 @@ class SaveCategoryRequest extends FormRequest
             ],
             'type' => ['required', Rule::enum(CategoryType::class)],
             'color' => ['nullable', 'hex_color'],
+            'normal_amount' => ['nullable', 'decimal:0,2', 'gt:0', 'max:999999999999'],
+            'normal_tolerance' => ['nullable', 'integer', 'between:1,200'],
             'parent_id' => [
                 'nullable', 'integer',
                 Rule::exists('categories', 'id')

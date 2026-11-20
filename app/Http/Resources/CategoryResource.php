@@ -22,6 +22,10 @@ class CategoryResource extends JsonResource
             'type' => $this->type->value,
             'color' => $this->color,
             'parent_id' => $this->parent_id,
+            'normal_amount' => $this->normal_amount,
+            'normal_tolerance' => $this->normal_tolerance,
+            'month_total' => $this->when($this->resource->hasAttribute('month_total'), fn () => $this->resource->getAttribute('month_total')),
+            'norm' => $this->when($this->resource->hasAttribute('norm'), fn () => $this->resource->getAttribute('norm')),
             'transactions_count' => $this->whenCounted('transactions'),
         ];
     }

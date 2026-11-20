@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'type', 'base_currency', 'timezone', 'country'])]
+#[Fillable(['name', 'type', 'base_currency', 'timezone', 'country', 'ai_insights_enabled'])]
 class Workspace extends Model
 {
     /** @use HasFactory<WorkspaceFactory> */
@@ -25,6 +25,7 @@ class Workspace extends Model
     {
         return [
             'type' => WorkspaceType::class,
+            'ai_insights_enabled' => 'boolean',
         ];
     }
 
@@ -68,6 +69,14 @@ class Workspace extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * @return HasMany<Import, $this>
+     */
+    public function imports(): HasMany
+    {
+        return $this->hasMany(Import::class);
     }
 
     /**

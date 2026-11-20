@@ -41,6 +41,12 @@ export default function Notifications() {
                             <div>
                                 <p className="font-semibold text-ink">{notification.data.title}</p>
                                 <p className="mt-1 text-sm text-slate-600">{notification.data.message}</p>
+                                {notification.data.ai_explanation && (
+                                    <div className="mt-3 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-900">
+                                        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-500">Explained by AI · check before acting</p>
+                                        {notification.data.ai_explanation}
+                                    </div>
+                                )}
                                 <p className="mt-2 text-xs text-slate-400">{new Date(notification.created_at).toLocaleString()}</p>
                             </div>
                             {notification.data.link && (

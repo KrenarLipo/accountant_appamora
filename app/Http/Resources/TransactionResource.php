@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\Transaction;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +22,10 @@ class TransactionResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type->value,
             'amount' => $this->amount,
+            'return_amount' => $this->return_amount,
+            'profit' => $this->return_amount === null
+                ? null
+                : (string) BigDecimal::of($this->return_amount)->minus($this->amount)->toScale(2, RoundingMode::HalfUp),
             'currency' => $this->currency,
             'transaction_date' => $this->transaction_date->toDateString(),
             'merchant' => $this->merchant,

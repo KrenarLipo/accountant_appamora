@@ -47,6 +47,10 @@ class SaveTransactionRequest extends FormRequest
                     ->whereNull('deleted_at'),
             ],
             'amount' => ['required', 'decimal:0,2', 'gt:0', 'max:999999999999'],
+            'return_amount' => [
+                Rule::prohibitedIf($type !== TransactionType::Expense),
+                'nullable', 'decimal:0,2', 'gte:0', 'max:999999999999',
+            ],
             'transaction_date' => ['required', 'date_format:Y-m-d'],
             'merchant' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -62,6 +66,7 @@ class SaveTransactionRequest extends FormRequest
             'category_id.exists' => 'Choose a category that matches the transaction type.',
             'transfer_account_id.different' => 'Choose a different account to transfer to.',
             'transfer_account_id.required' => 'Choose the account to transfer to.',
+            'return_amount.prohibited' => 'Only expenses can have money earned back.',
         ];
     }
 }

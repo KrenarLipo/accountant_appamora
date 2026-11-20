@@ -131,7 +131,14 @@ export default function Transactions() {
                                         {transaction.description && ` · ${transaction.description}`}
                                     </p>
                                 </div>
-                                <span className="text-sm font-semibold whitespace-nowrap">{signed(transaction)}</span>
+                                <span className="flex flex-col items-end text-sm font-semibold whitespace-nowrap">
+                                    {signed(transaction)}
+                                    {transaction.profit !== null && (
+                                        <span className={`text-xs font-medium ${Number(transaction.profit) >= 0 ? 'text-brand-700' : 'text-red-600'}`}>
+                                            {Number(transaction.profit) >= 0 ? 'Profit' : 'Loss'} {money(Math.abs(Number(transaction.profit)), transaction.currency)}
+                                        </span>
+                                    )}
+                                </span>
                                 {canEdit && (
                                     <div className="flex gap-1">
                                         <Button variant="ghost" className="px-2 py-1 text-xs" onClick={() => setEditing(transaction)}>Edit</Button>
@@ -159,6 +166,7 @@ export default function Transactions() {
                         accounts={accounts.data!.data}
                         categories={categories.data!.data}
                         transaction={editing}
+                        currency={workspace.base_currency}
                         onSaved={saved}
                     />
                 )}

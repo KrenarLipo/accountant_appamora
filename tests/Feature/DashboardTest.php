@@ -51,8 +51,8 @@ class DashboardTest extends TestCase
 
         $response = $this->getJson("/api/v1/workspaces/{$workspace->id}/dashboard?month=2026-11")->assertOk();
 
-        $response->assertJsonPath('data.totals', ['income' => '2000.00', 'expenses' => '700.30', 'net' => '1299.70'])
-            ->assertJsonPath('data.previous_totals', ['income' => '0.00', 'expenses' => '30.00', 'net' => '-30.00'])
+        $response->assertJsonPath('data.totals', ['income' => '2000.00', 'expenses' => '700.30', 'returns' => '0.00', 'net' => '1299.70'])
+            ->assertJsonPath('data.previous_totals', ['income' => '0.00', 'expenses' => '30.00', 'returns' => '0.00', 'net' => '-30.00'])
             ->assertJsonPath('data.currency', 'EUR')
             ->assertJsonPath('data.expenses_by_category.0.name', 'Rent')
             ->assertJsonPath('data.expenses_by_category.1.total', '0.30')
@@ -63,7 +63,7 @@ class DashboardTest extends TestCase
         $this->assertSame('149.70', $balances['Cash']);  // 50 - 0.30 + 100
 
         $november = collect($response->json('data.trend'))->firstWhere('month', '2026-11');
-        $this->assertSame(['month' => '2026-11', 'income' => '2000.00', 'expenses' => '700.30'], $november);
+        $this->assertSame(['month' => '2026-11', 'income' => '2000.00', 'expenses' => '700.30', 'returns' => '0.00', 'net' => '1299.70'], $november);
     }
 
     public function test_deleted_transactions_are_excluded_from_totals(): void

@@ -57,6 +57,10 @@ class DemoSeeder extends Seeder
             ]);
         }
 
+        foreach (['Groceries' => '220.00', 'Dining out' => '60.00', 'Utilities' => '55.00'] as $name => $normal) {
+            $home->categories()->where('name', $name)->update(['normal_amount' => $normal, 'normal_tolerance' => 20]);
+        }
+
         $shop = $createWorkspace->handle($user, [
             'name' => 'Demo Shop', 'type' => 'business', 'base_currency' => 'EUR',
             'timezone' => 'Europe/Tirane', 'country' => 'AL',
@@ -65,16 +69,20 @@ class DemoSeeder extends Seeder
 
         $this->seedMonths($shop, [
             ['Sales', 'income', 'Customers', [180, 420], 12],
-            ['Suppliers', 'expense', 'Wholesaler', [300, 900], 3],
+            ['Suppliers', 'expense', 'Wholesaler', [300, 900], 3, [1.1, 1.6]],
             ['Rent', 'expense', 'Property owner', [800, 800], 1],
             ['Salaries', 'expense', 'Payroll', [1100, 1100], 1],
             ['Marketing', 'expense', 'Social media ads', [50, 200], 2],
             ['Software', 'expense', 'POS subscription', [29, 29], 1],
         ]);
+
+        foreach (['Marketing' => '150.00', 'Suppliers' => '1500.00', 'Sales' => '3500.00'] as $name => $normal) {
+            $shop->categories()->where('name', $name)->update(['normal_amount' => $normal, 'normal_tolerance' => 25]);
+        }
     }
 
     /**
-     * @param  list<array{0: string, 1: string, 2: string, 3: array{0: int, 1: int}, 4: int}>  $patterns  [category, type, merchant, [min, max], times per month]
+     * @param  list<array{0: string, 1: string, 2: string, 3: array{0: int, 1: int}, 4: int, 5?: array{0: float, 1: float}}>  $patterns  [category, type, merchant, [min, max], times per month, optional return multiplier range]
      */
     private function seedMonths(Workspace $workspace, array $patterns): void
     {
@@ -85,15 +93,23 @@ class DemoSeeder extends Seeder
             $month = $today->startOfMonth()->subMonths($monthsAgo);
             $lastDay = $monthsAgo === 0 ? $today->day : $month->daysInMonth;
 
-            foreach ($patterns as [$categoryName, $type, $merchant, [$min, $max], $times]) {
+            foreach ($patterns as $pattern) {
+                [$categoryName, $type, $merchant, [$min, $max], $times] = $pattern;
+                $returnRange = $pattern[5] ?? null;
                 $categoryId = $workspace->categories()->where('name', $categoryName)->value('id');
 
                 for ($i = 0; $i < $times; $i++) {
+                    $amount = fake()->randomFloat(2, $min, $max);
+                    $returnAmount = $returnRange
+                        ? number_format($amount * fake()->randomFloat(2, $returnRange[0], $returnRange[1]), 2, '.', '')
+                        : null;
+
                     $transaction = new Transaction([
                         'type' => $type,
                         'account_id' => $account->id,
                         'category_id' => $categoryId,
-                        'amount' => number_format(fake()->randomFloat(2, $min, $max), 2, '.', ''),
+                        'amount' => number_format($amount, 2, '.', ''),
+                        'return_amount' => $returnAmount,
                         'currency' => $workspace->base_currency,
                         'transaction_date' => $month->addDays(fake()->numberBetween(0, $lastDay - 1))->toDateString(),
                         'merchant' => $merchant,

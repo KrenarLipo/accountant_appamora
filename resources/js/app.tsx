@@ -6,8 +6,10 @@ import { Loading } from './components/ui';
 import { WorkspaceProvider, useWorkspaceState } from './lib/workspace';
 import Accounts from './pages/Accounts';
 import Budgets from './pages/Budgets';
+import Calendar from './pages/Calendar';
 import Categories from './pages/Categories';
 import Dashboard from './pages/Dashboard';
+import ImportExport from './pages/ImportExport';
 import Notifications from './pages/Notifications';
 import Onboarding from './pages/Onboarding';
 import Settings from './pages/Settings';
@@ -29,7 +31,9 @@ function AppRoutes() {
             <Route element={<Layout />}>
                 {/* key resets each screen when the workspace changes */}
                 <Route index element={<Dashboard key={workspace.id} />} />
+                <Route path="calendar" element={<Calendar key={workspace.id} />} />
                 <Route path="transactions" element={<Transactions key={workspace.id} />} />
+                <Route path="import-export" element={<ImportExport key={workspace.id} />} />
                 <Route path="budgets" element={<Budgets key={workspace.id} />} />
                 <Route path="accounts" element={<Accounts key={workspace.id} />} />
                 <Route path="categories" element={<Categories key={workspace.id} />} />

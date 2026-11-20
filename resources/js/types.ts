@@ -17,6 +17,8 @@ export interface Workspace {
     base_currency: string;
     timezone: string;
     country: string | null;
+    ai_insights_enabled: boolean;
+    ai_available: boolean;
     role: Role;
     permissions: {
         manage_workspace: boolean;
@@ -42,13 +44,19 @@ export interface Category {
     type: CategoryType;
     color: string | null;
     parent_id: number | null;
+    normal_amount: string | null;
+    normal_tolerance: number;
     transactions_count?: number;
+    month_total?: string;
+    norm?: { normal: string; actual: string; tolerance: number; deviation_percent: number; status: 'normal' | 'over' | 'under' | 'below_so_far' } | null;
 }
 
 export interface Transaction {
     id: number;
     type: TransactionType;
     amount: string;
+    return_amount: string | null;
+    profit: string | null;
     currency: string;
     transaction_date: string;
     merchant: string | null;
@@ -73,7 +81,44 @@ export interface BudgetStatus {
 export interface Totals {
     income: string;
     expenses: string;
+    returns: string;
     net: string;
+}
+
+export interface CalendarDay extends Totals {
+    date: string;
+    count: number;
+}
+
+export interface CalendarMonth {
+    month: string;
+    today: string;
+    currency: string;
+    days: CalendarDay[];
+    totals: Totals;
+}
+
+export interface ImportRow {
+    line: number;
+    status: 'ok' | 'error' | 'duplicate';
+    errors: string[];
+    date: string | null;
+    type: TransactionType | null;
+    category: string | null;
+    creates_category: boolean;
+    amount: string | null;
+    return_amount: string | null;
+    merchant: string | null;
+    note: string | null;
+    account: string | null;
+    to_account: string | null;
+}
+
+export interface ImportPreview {
+    rows: ImportRow[];
+    summary: { total: number; ready: number; duplicates: number; errors: number; new_categories: string[] };
+    missing_columns: string[];
+    already_imported_at: string | null;
 }
 
 export interface Dashboard {
@@ -82,7 +127,7 @@ export interface Dashboard {
     totals: Totals;
     previous_totals: Totals;
     accounts: AccountBalance[];
-    trend: { month: string; income: string; expenses: string }[];
+    trend: ({ month: string } & Totals)[];
     expenses_by_category: { category_id: number | null; name: string; color: string | null; total: string }[];
     top_merchants: { merchant: string; total: string; count: number }[];
     budgets: BudgetStatus[];
@@ -91,7 +136,7 @@ export interface Dashboard {
 
 export interface AppNotification {
     id: string;
-    data: { title: string; message: string; link?: string; workspace_id?: number };
+    data: { title: string; message: string; link?: string; workspace_id?: number; ai_explanation?: string | null };
     read_at: string | null;
     created_at: string;
 }
