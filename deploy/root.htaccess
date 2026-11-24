@@ -1,0 +1,33 @@
+# Accountant by AppAmora
+# The whole app is in this folder, but only public/ may be reached from the web.
+# (Can be removed once the subdomain's Document Root points straight at public/.)
+
+Options -Indexes
+
+# The app's own folders (app/, vendor/, storage/...) must not trigger Apache's automatic "add a slash" redirect
+DirectorySlash Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Always HTTPS
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # SSL certificate checks (AutoSSL) stay reachable
+    RewriteRule ^\.well-known/ - [L]
+
+    # Remove a trailing slash so URLs never gain /public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.+)/$ https://%{HTTP_HOST}/$1 [L,R=301]
+
+    # Everything else is served from public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Never serve hidden files such as .env
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

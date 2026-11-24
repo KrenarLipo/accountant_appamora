@@ -45,9 +45,13 @@ accountant-app/public
 
 (Old cPanel: **Subdomains** → pencil icon next to the document root.)
 
-If cPanel does not allow that path, use the fallback: copy everything inside `accountant-app/public/`
-into the subdomain's current folder, then replace that folder's `index.php` with
-`accountant-app/deploy/public_html-index.php` and check the `$app` path at the top of it.
+**Current live setup (Nov 2026):** the app was extracted straight into the subdomain's folder, and that folder is
+the Document Root. `deploy/root.htaccess` is uploaded there as `.htaccess`: it serves only `public/`, keeps
+`/.well-known/` for SSL, forces HTTPS and blocks hidden files. Keep it whenever you update the files.
+If you later set the Document Root to `…/public`, that `.htaccess` is no longer needed.
+
+Other fallback: copy everything inside `accountant-app/public/` into the subdomain's folder, replace that
+folder's `index.php` with `deploy/public_html-index.php` and check the `$app` path at the top of it.
 
 ## 5. Fill in the secrets
 
@@ -82,6 +86,7 @@ If that PHP path is wrong, try `/opt/cpanel/ea-php83/root/usr/bin/php`.
 
 1. `git pull` and `deploy/build-release.sh` on your computer.
 2. Upload and extract the new zip **in a temporary folder**, then copy everything into `accountant-app/`
-   **except** `.env` and `storage/` (those hold the live configuration and logs).
+   **except** `.env`, `storage/` and the root `.htaccess` (those hold the live configuration, logs and the
+   folder protection).
 3. If the release adds database changes, they will be listed in the release notes as SQL to run in phpMyAdmin
    (or run `php artisan migrate --force` if your plan has Terminal/SSH).
