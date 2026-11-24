@@ -4,11 +4,13 @@ namespace App\Jobs;
 
 use App\Contracts\ExplainsAlerts;
 use App\Models\Category;
+use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\CategoryDeviationDetected;
 use App\Services\CategoryNormMonitor;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 /**
  * Builds the alert (with an optional AI explanation) and notifies the workspace's finance members.
@@ -38,8 +40,14 @@ class SendCategoryDeviationAlert
         $facts = $monitor->facts($workspace, $category, $month, $this->direction);
         $explanation = $explainer->explain($workspace, $facts);
 
-        $monitor->recipients($workspace)->each(
-            fn ($user) => $user->notify(new CategoryDeviationDetected($workspace, $facts, $explanation))
-        );
+        $notification = new CategoryDeviationDetected($workspace, $facts, $explanation);
+
+        $monitor->recipients($workspace)->each(function (User $user) use ($notification): void {
+            try {
+                $user->notify($notification);
+            } catch (TransportExceptionInterface $exception) {
+                report($exception);
+            }
+        });
     }
 }

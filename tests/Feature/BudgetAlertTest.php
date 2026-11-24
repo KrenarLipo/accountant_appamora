@@ -55,6 +55,17 @@ class BudgetAlertTest extends TestCase
         $this->assertDatabaseCount('budget_alerts', 2);
     }
 
+    public function test_a_failing_alert_email_does_not_stop_the_transaction_or_the_in_app_alert(): void
+    {
+        $this->breakMailDelivery();
+        Sanctum::actingAs($this->workspace->owner);
+
+        $this->spend('230.00');
+
+        $this->assertDatabaseCount('transactions', 1);
+        $this->assertDatabaseCount('notifications', 1);
+    }
+
     public function test_the_same_threshold_is_not_alerted_twice_in_a_month(): void
     {
         Notification::fake();

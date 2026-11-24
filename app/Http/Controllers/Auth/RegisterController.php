@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class RegisterController extends Controller
 {
@@ -33,11 +34,20 @@ class RegisterController extends Controller
             'password' => $validated['password'],
         ]);
 
-        event(new Registered($user));
+        $verificationEmailSent = true;
+
+        try {
+            event(new Registered($user));
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+            $verificationEmailSent = false;
+        }
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('verification.notice');
+        $redirect = redirect()->route('verification.notice');
+
+        return $verificationEmailSent ? $redirect : $redirect->with('status', EmailVerificationController::SEND_FAILED);
     }
 }

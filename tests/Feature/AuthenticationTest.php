@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -96,6 +97,46 @@ class AuthenticationTest extends TestCase
         $this->actingAs($user)->get($url)->assertRedirect(route('app'));
 
         $this->assertNotNull($user->fresh()->email_verified_at);
+    }
+
+    public function test_registration_still_works_when_the_email_cannot_be_sent(): void
+    {
+        $this->breakMailDelivery();
+
+        $response = $this->post('/register', [
+            'name' => 'Arta Hoxha',
+            'email' => 'arta@example.com',
+            'password' => 'a-Strong-pass-123',
+            'password_confirmation' => 'a-Strong-pass-123',
+            'terms' => '1',
+        ]);
+
+        $response->assertRedirect(route('verification.notice'));
+        $response->assertSessionHas('status', EmailVerificationController::SEND_FAILED);
+        $this->assertAuthenticatedAs(User::where('email', 'arta@example.com')->sole());
+    }
+
+    public function test_resending_the_verification_email_reports_a_mail_failure_instead_of_crashing(): void
+    {
+        $this->breakMailDelivery();
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)
+            ->from(route('verification.notice'))
+            ->post(route('verification.send'))
+            ->assertRedirect(route('verification.notice'))
+            ->assertSessionHas('status', 'We could not send the email right now. Please try again in a few minutes.');
+    }
+
+    public function test_emails_carry_the_configured_reply_to_address(): void
+    {
+        config(['mail.reply_to.address' => 'owner@example.com']);
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)->post(route('verification.send'));
+
+        $message = app('mailer')->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
+        $this->assertSame('owner@example.com', $message->getReplyTo()[0]->getAddress());
     }
 
     public function test_the_api_rejects_unauthenticated_requests(): void

@@ -12,6 +12,7 @@ use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class BudgetTracker
 {
@@ -73,14 +74,15 @@ class BudgetTracker
                 continue;
             }
 
-            $this->financeRecipients($workspace)->each(
-                fn (User $user) => $user->notify(new BudgetThresholdReached(
-                    $workspace,
-                    $item['status'],
-                    (int) $newThresholds->max(),
-                    $period,
-                ))
-            );
+            $notification = new BudgetThresholdReached($workspace, $item['status'], (int) $newThresholds->max(), $period);
+
+            $this->financeRecipients($workspace)->each(function (User $user) use ($notification): void {
+                try {
+                    $user->notify($notification);
+                } catch (TransportExceptionInterface $exception) {
+                    report($exception);
+                }
+            });
         }
     }
 

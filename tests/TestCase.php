@@ -19,4 +19,15 @@ abstract class TestCase extends BaseTestCase
 
         return $user;
     }
+
+    /**
+     * Point outgoing email at a closed local port, like a host that blocks SMTP.
+     */
+    protected function breakMailDelivery(): void
+    {
+        config([
+            'mail.default' => 'unreachable',
+            'mail.mailers.unreachable' => ['transport' => 'smtp', 'host' => '127.0.0.1', 'port' => 1, 'timeout' => 2],
+        ]);
+    }
 }
