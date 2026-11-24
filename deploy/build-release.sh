@@ -40,6 +40,12 @@ rm -rf node_modules tests .claude .ai .editorconfig .npmrc AGENTS.md CLAUDE.md b
        public/hot storage/logs/*.log bootstrap/cache/*.php
 mkdir -p storage/framework/{cache/data,sessions,views} storage/logs storage/app/private bootstrap/cache
 
+echo "→ Setting cPanel-safe permissions (folders 755, files 644, .env 640)"
+find . -type d -exec chmod 755 {} +
+find . -type f -exec chmod 644 {} +
+chmod 755 artisan
+chmod 640 .env
+
 echo "→ Zipping"
 cd "$WORK"
 rm -f "$OUT"
